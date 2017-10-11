@@ -6,10 +6,7 @@ function preload() {
 
 function setup() {
     createCanvas(width_Canvas, 412);
-
-    // set up pumpkin
     coord_Left = data_coordLeft.data;
-    pumpkin_Grid();
 
     // draw background
     background(0);
@@ -17,6 +14,7 @@ function setup() {
     triangles.draw_Triangles();
 
     // draw pumpkin
+    pumpkin_Grid();
     draw_PumpSects();
     draw_Dots();
 }
