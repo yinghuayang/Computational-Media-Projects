@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Torn Between</title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100% }
+    </style>
+</head>
+<body>
+<script src="three.js"></script>
+<script src="Detector.js"></script>
+<script src="http://threejs.org/examples/js/libs/stats.min.js"></script>
+<script>
+    if (!Detector.webgl) Detector.addGetWebGLMessage();
+
+    // Set up the scene, camera, and renderer as global variables;
+    let scene, camera, renderer, bitcoin, ethereum, torusKnot_Bitcoin, torusKnot_Ethereum, torusKnot_Winds;
+    let container, stats; // not sure why stats??
+
+    init();
+    animate();
+
+    function getJSON(url){
+        let resp;
+        let xmlHttp;
+        resp = '';
+        xmlHttp = new XMLHttpRequest();
+
+        if(xmlHttp != null){
+            xmlHttp.open("GET", url, false);
+            xmlHttp.send(null);
+            resp = JSON.parse(xmlHttp.responseText); /* Have to add JSON.parse!! refer to
+            https://www.youtube.com/watch?v=wI1CWzNtE-M */
+        }
+        return resp;
+    }
+
+    bitcoin = getJSON("https://blockchain.info/ticker");
+    torusKnot_Winds = bitcoin.USD.last;
+
+    function init(){
+        container = document.createElement('div'); /* refer to
+        https://developer.mozilla.org/en-US/docs/Web/API/Document/createElement */
+        document.body.appendChild(container); /* add the renderer element to HTML document,
+        which is a canvas element that the renderer uses to display the scene to us */
+
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
+        camera.position.y = 400; /* since the torusKnot was added to (0, 0, 0),
+        the camera needs to be moved out a bit, so that it won't be inside the cube. */
+
+        scene = new THREE.Scene();
+
+        let light;
+
+        scene.add(new THREE.AmbientLight(0x404040));
+
+        light = new THREE.DirectionalLight(0xffffff);
+        light.position.set(0, 1, 0);
+        scene.add(light);
+
+        let geometry = new THREE.TorusKnotGeometry(100, 15, 100, 16, torusKnot_Winds, torusKnot_Winds);
+        let material = new THREE.MeshBasicMaterial({color: 0xDACFFC});
+
+        torusKnot_Bitcoin = new THREE.Mesh(geometry, material);
+        torusKnot_Bitcoin.position.set(0, 0, 0);
+        scene.add(torusKnot_Bitcoin);
+
+//        torusKnot_Ethereum = new THREE.Mesh(new THREE.TorusKnotGeometry(50, 10, 50, 20), material);
+//        torusKnot_Ethereum.position.set(0, 0, 200);
+//        scene.add(torusKnot_Ethereum);
+
+        renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.setPixelRatio( window.devicePixelRatio ); // not sure whether it's necessary
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        container.appendChild(renderer.domElement);
+
+        stats = new Stats();
+        container.appendChild(stats.dom);
+
+    }
+
+    function animate(){
+        requestAnimationFrame(animate);
+        render();
+        stats.update();
+    }
+
+    function render(){
+        let timer = Date.now() * 0.0001;
+        camera.position.x = Math.cos( timer ) * 800;
+        camera.position.z = Math.sin( timer ) * 800;
+        camera.lookAt( scene.position );
+        for ( let i = 0, l = scene.children.length; i < l; i ++ ) {
+            let object = scene.children[ i ];
+            object.rotation.x = timer * 5;
+            object.rotation.y = timer * 2.5;
+        }
+        renderer.render(scene, camera);
+    }
+
+</script>
+</body>
+</html>
